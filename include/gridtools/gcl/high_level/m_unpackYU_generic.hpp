@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -110,7 +111,7 @@ void m_unpackYU_generic(
 
         if (nbx != 0 && nby != 0 && nbz != 0) {
             // the actual kernel launch
-            m_unpackYUKernel_generic<<<blocks, threads>>>(fields[i].ptr,
+            hipLaunchKernelGGL(m_unpackYUKernel_generic, dim3(blocks), dim3(threads), 0, 0, fields[i].ptr,
                 reinterpret_cast<typename array_t::value_type::value_type **>(d_msgbufTab_r),
                 wrap_argument(d_msgsize_r + 27 * i),
                 *(reinterpret_cast<const gridtools::array<gridtools::halo_descriptor, 3> *>(&fields[i])),
@@ -121,7 +122,7 @@ void m_unpackYU_generic(
                     (fields[i].halos[2].begin()) * fields[i].halos[0].total_length() *
                         fields[i].halos[1].total_length(),
                 0);
-            GT_CUDA_CHECK(cudaGetLastError());
+            GT_CUDA_CHECK(hipGetLastError());
         }
     }
 }

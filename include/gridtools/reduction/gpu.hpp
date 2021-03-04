@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -296,9 +297,9 @@ namespace gridtools {
 
             inline auto fecth_device_properties() {
                 int device;
-                GT_CUDA_CHECK(cudaGetDevice(&device));
-                cudaDeviceProp res;
-                GT_CUDA_CHECK(cudaGetDeviceProperties(&res, device));
+                GT_CUDA_CHECK(hipGetDevice(&device));
+                hipDeviceProp_t res;
+                GT_CUDA_CHECK(hipGetDeviceProperties(&res, device));
                 return res;
             }
 
@@ -355,8 +356,8 @@ namespace gridtools {
                             [=](auto n) {
                                 constexpr size_t block_size = 1 << decltype(n)::value;
                                 using kernel_t = choose_kernel<warp_size, block_size, T>;
-                                launch<<<blocks, threads>>>(kernel_t(), f, in, out);
-                                GT_CUDA_CHECK(cudaGetLastError());
+                                hipLaunchKernelGGL(launch, dim3(blocks), dim3(threads), 0, 0, kernel_t(), f, in, out);
+                                GT_CUDA_CHECK(hipGetLastError());
                             },
                             int_log2(threads));
                     },
@@ -384,7 +385,7 @@ namespace gridtools {
                     in = out;
                 }
                 T buff[cpu_final_threshold_t::value];
-                GT_CUDA_CHECK(cudaMemcpy(buff, in, n * sizeof(T), cudaMemcpyDeviceToHost));
+                GT_CUDA_CHECK(hipMemcpy(buff, in, n * sizeof(T), hipMemcpyDeviceToHost));
                 return reduce_cpu(f, buff, n);
             }
 
@@ -408,8 +409,8 @@ namespace gridtools {
                 if (!has_holes && data_size == rounded_size)
                     return;
                 auto threads = gcd(rounded_size, max_threads());
-                fill<<<rounded_size / threads, threads>>>(dst, val);
-                GT_CUDA_CHECK(cudaGetLastError());
+                hipLaunchKernelGGL(fill, dim3(rounded_size / threads), dim3(threads), 0, 0, dst, val);
+                GT_CUDA_CHECK(hipGetLastError());
             }
         } // namespace gpu_backend
         using gpu_backend::gpu;

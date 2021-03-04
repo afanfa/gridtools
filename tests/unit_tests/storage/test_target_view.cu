@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -48,7 +49,7 @@ TEST(DataViewTest, Simple) {
     EXPECT_EQ(50, dvro(0, 0, 0));
     EXPECT_EQ(60, dvro(1, 0, 0));
 
-    mul2<<<1, 1>>>(ds->target_view());
+    hipLaunchKernelGGL(mul2, dim3(1), dim3(1), 0, 0, ds->target_view());
 
     dvro = ds->const_host_view();
     // check if data is the same

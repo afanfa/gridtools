@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 # try_compile_hip(result)
 # Parameters:
 #    - result: result variable is set to TRUE if HIP compilation worked.
@@ -13,7 +14,7 @@ int main(int argc, char* argv[]) {
     int* out;
     hipMalloc((void**)&in, sizeof(int));
     hipMalloc((void**)&out, sizeof(int));
-    helloworld<<<1,1>>>(in, out);
+    hipLaunchKernelGGL(helloworld, dim3(1), dim3(1), 0, 0, in, out);
     hipFree(in);
     hipFree(out);
 }

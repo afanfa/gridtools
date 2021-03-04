@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -38,8 +39,8 @@ TEST(StorageCudaTest, Simple) {
     s2->host_view()(0) = 100;
     s2->host_view()(1) = 200;
     // assert if the values were not copied correctly and reset values
-    check_s1<<<1, 1>>>(s1->get_target_ptr());
-    check_s2<<<1, 1>>>(s2->get_target_ptr());
+    hipLaunchKernelGGL(check_s1, dim3(1), dim3(1), 0, 0, s1->get_target_ptr());
+    hipLaunchKernelGGL(check_s2, dim3(1), dim3(1), 0, 0, s2->get_target_ptr());
 
     // check values
     EXPECT_EQ(s1->host_view()(1), 40);

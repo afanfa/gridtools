@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -146,14 +147,14 @@ void m_packZL_generic(
 
         if (nbx != 0 && nby != 0 && nbz != 0) {
             // the actual kernel launch
-            m_packZLKernel_generic<<<blocks, threads>>>(fields[i].ptr,
+            hipLaunchKernelGGL(m_packZLKernel_generic, dim3(blocks), dim3(threads), 0, 0, fields[i].ptr,
                 (d_msgbufTab),
                 wrap_argument(d_msgsize + 27 * i),
                 *(reinterpret_cast<const gridtools::array<gridtools::halo_descriptor, 3> *>(&fields[i])),
                 nx,
                 ny,
                 0);
-            GT_CUDA_CHECK(cudaGetLastError());
+            GT_CUDA_CHECK(hipGetLastError());
         }
     }
 }

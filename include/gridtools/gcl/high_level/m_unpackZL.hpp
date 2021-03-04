@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -132,7 +133,7 @@ void m_unpackZL(array_t const &d_data_array,
     for (int i = 0; i < niter; i++) {
 
         // the actual kernel launch
-        m_unpackZLKernel<<<blocks, threads, 0, 0>>>(d_data_array[i],
+        hipLaunchKernelGGL(m_unpackZLKernel, dim3(blocks), dim3(threads), 0, 0, d_data_array[i],
             d_msgbufTab_r,
             d_msgsize_r,
             halo_d,
@@ -141,7 +142,7 @@ void m_unpackZL(array_t const &d_data_array,
             (halo[0].begin() - halo[0].minus()) + (halo[1].begin() - halo[1].minus()) * halo[0].total_length() +
                 (halo[2].begin() - halo[2].minus()) * halo[0].total_length() * halo[1].total_length(),
             i);
-        GT_CUDA_CHECK(cudaGetLastError());
+        GT_CUDA_CHECK(hipGetLastError());
     }
 }
 
@@ -163,9 +164,9 @@ int call_kernel_ZL_u(Blocks blocks,
     int ny,
     int tranlation_const,
     int i) {
-    m_unpackZLKernel<<<blocks, threads, b, 0>>>(d_data, d_msgbufTab, d_msgsize, halo_d, nx, ny, tranlation_const, i);
+    hipLaunchKernelGGL(m_unpackZLKernel, dim3(blocks), dim3(threads), b, 0, d_data, d_msgbufTab, d_msgsize, halo_d, nx, ny, tranlation_const, i);
 
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 
     return 0;
 }

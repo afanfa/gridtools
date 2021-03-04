@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -75,22 +76,22 @@ void test_atomic_add() {
     T sumRef = 0;
     T sum = 0;
     T *sumDevice;
-    GT_CUDA_CHECK(cudaMalloc(&sumDevice, sizeof(T)));
-    GT_CUDA_CHECK(cudaMemcpy(sumDevice, &sum, sizeof(T), cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMalloc(&sumDevice, sizeof(T)));
+    GT_CUDA_CHECK(hipMemcpy(sumDevice, &sum, sizeof(T), hipMemcpyHostToDevice));
 
     T *fieldDevice;
-    GT_CUDA_CHECK(cudaMalloc(&fieldDevice, sizeof(T) * size));
+    GT_CUDA_CHECK(hipMalloc(&fieldDevice, sizeof(T) * size));
 
     for (int cnt = 0; cnt < size; ++cnt) {
         field[cnt] = static_cast<T>(std::rand() % 100 + (std::rand() % 100) * 0.005);
         sumRef += field[cnt];
     }
 
-    GT_CUDA_CHECK(cudaMemcpy(fieldDevice, &field[0], sizeof(T) * size, cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMemcpy(fieldDevice, &field[0], sizeof(T) * size, hipMemcpyHostToDevice));
 
-    atomic_add_kernel<<<numberOfBlocks, threadsPerBlock>>>(sumDevice, fieldDevice, size);
+    hipLaunchKernelGGL(atomic_add_kernel, dim3(numberOfBlocks), dim3(threadsPerBlock), 0, 0, sumDevice, fieldDevice, size);
 
-    GT_CUDA_CHECK(cudaMemcpy(&sum, sumDevice, sizeof(T), cudaMemcpyDeviceToHost));
+    GT_CUDA_CHECK(hipMemcpy(&sum, sumDevice, sizeof(T), hipMemcpyDeviceToHost));
     verifier<T>::TestEQ(sumRef, sum);
 }
 
@@ -105,22 +106,22 @@ void test_atomic_sub() {
     T sumRef = 0;
     T sum = 0;
     T *sumDevice;
-    GT_CUDA_CHECK(cudaMalloc(&sumDevice, sizeof(T)));
-    GT_CUDA_CHECK(cudaMemcpy(sumDevice, &sum, sizeof(T), cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMalloc(&sumDevice, sizeof(T)));
+    GT_CUDA_CHECK(hipMemcpy(sumDevice, &sum, sizeof(T), hipMemcpyHostToDevice));
 
     T *fieldDevice;
-    GT_CUDA_CHECK(cudaMalloc(&fieldDevice, sizeof(T) * size));
+    GT_CUDA_CHECK(hipMalloc(&fieldDevice, sizeof(T) * size));
 
     for (int cnt = 0; cnt < size; ++cnt) {
         field[cnt] = static_cast<T>(std::rand() % 100 + (std::rand() % 100) * 0.005);
         sumRef -= field[cnt];
     }
 
-    GT_CUDA_CHECK(cudaMemcpy(fieldDevice, &field[0], sizeof(T) * size, cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMemcpy(fieldDevice, &field[0], sizeof(T) * size, hipMemcpyHostToDevice));
 
-    atomic_sub_kernel<<<numberOfBlocks, threadsPerBlock>>>(sumDevice, fieldDevice, size);
+    hipLaunchKernelGGL(atomic_sub_kernel, dim3(numberOfBlocks), dim3(threadsPerBlock), 0, 0, sumDevice, fieldDevice, size);
 
-    GT_CUDA_CHECK(cudaMemcpy(&sum, sumDevice, sizeof(T), cudaMemcpyDeviceToHost));
+    GT_CUDA_CHECK(hipMemcpy(&sum, sumDevice, sizeof(T), hipMemcpyDeviceToHost));
     verifier<T>::TestEQ(sumRef, sum);
 }
 
@@ -135,22 +136,22 @@ void test_atomic_min() {
     T minRef = 99999;
     T min = 99999;
     T *minDevice;
-    GT_CUDA_CHECK(cudaMalloc(&minDevice, sizeof(T)));
-    GT_CUDA_CHECK(cudaMemcpy(minDevice, &min, sizeof(T), cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMalloc(&minDevice, sizeof(T)));
+    GT_CUDA_CHECK(hipMemcpy(minDevice, &min, sizeof(T), hipMemcpyHostToDevice));
 
     T *fieldDevice;
-    GT_CUDA_CHECK(cudaMalloc(&fieldDevice, sizeof(T) * size));
+    GT_CUDA_CHECK(hipMalloc(&fieldDevice, sizeof(T) * size));
 
     for (int cnt = 0; cnt < size; ++cnt) {
         field[cnt] = static_cast<T>(std::rand() % 100 + (std::rand() % 100) * 0.005);
         minRef = std::min(minRef, field[cnt]);
     }
 
-    GT_CUDA_CHECK(cudaMemcpy(fieldDevice, &field[0], sizeof(T) * size, cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMemcpy(fieldDevice, &field[0], sizeof(T) * size, hipMemcpyHostToDevice));
 
-    atomic_min_kernel<<<numberOfBlocks, threadsPerBlock>>>(minDevice, fieldDevice, size);
+    hipLaunchKernelGGL(atomic_min_kernel, dim3(numberOfBlocks), dim3(threadsPerBlock), 0, 0, minDevice, fieldDevice, size);
 
-    GT_CUDA_CHECK(cudaMemcpy(&min, minDevice, sizeof(T), cudaMemcpyDeviceToHost));
+    GT_CUDA_CHECK(hipMemcpy(&min, minDevice, sizeof(T), hipMemcpyDeviceToHost));
     verifier<T>::TestEQ(minRef, min);
 }
 template <typename T>
@@ -164,22 +165,22 @@ void test_atomic_max() {
     T maxRef = -1;
     T max = -1;
     T *maxDevice;
-    GT_CUDA_CHECK(cudaMalloc(&maxDevice, sizeof(T)));
-    GT_CUDA_CHECK(cudaMemcpy(maxDevice, &max, sizeof(T), cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMalloc(&maxDevice, sizeof(T)));
+    GT_CUDA_CHECK(hipMemcpy(maxDevice, &max, sizeof(T), hipMemcpyHostToDevice));
 
     T *fieldDevice;
-    GT_CUDA_CHECK(cudaMalloc(&fieldDevice, sizeof(T) * size));
+    GT_CUDA_CHECK(hipMalloc(&fieldDevice, sizeof(T) * size));
 
     for (int cnt = 0; cnt < size; ++cnt) {
         field[cnt] = static_cast<T>(std::rand() % 100 + (std::rand() % 100) * 0.005);
         maxRef = std::max(maxRef, field[cnt]);
     }
 
-    GT_CUDA_CHECK(cudaMemcpy(fieldDevice, &field[0], sizeof(T) * size, cudaMemcpyHostToDevice));
+    GT_CUDA_CHECK(hipMemcpy(fieldDevice, &field[0], sizeof(T) * size, hipMemcpyHostToDevice));
 
-    atomic_max_kernel<<<numberOfBlocks, threadsPerBlock>>>(maxDevice, fieldDevice, size);
+    hipLaunchKernelGGL(atomic_max_kernel, dim3(numberOfBlocks), dim3(threadsPerBlock), 0, 0, maxDevice, fieldDevice, size);
 
-    GT_CUDA_CHECK(cudaMemcpy(&max, maxDevice, sizeof(T), cudaMemcpyDeviceToHost));
+    GT_CUDA_CHECK(hipMemcpy(&max, maxDevice, sizeof(T), hipMemcpyDeviceToHost));
     verifier<T>::TestEQ(maxRef, max);
 }
 

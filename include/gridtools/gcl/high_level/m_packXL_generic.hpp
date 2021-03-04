@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -99,14 +100,14 @@ void m_packXL_generic(array_t const &fields, typename array_t::value_type::value
 
         if (nbx != 0 && nby != 0 && nbz != 0) {
             // the actual kernel launch
-            m_packXLKernel_generic<<<blocks, threads>>>(fields[i].ptr,
+            hipLaunchKernelGGL(m_packXLKernel_generic, dim3(blocks), dim3(threads), 0, 0, fields[i].ptr,
                 reinterpret_cast<typename array_t::value_type::value_type **>(d_msgbufTab),
                 wrap_argument(d_msgsize + 27 * i),
                 *reinterpret_cast<const gridtools::array<gridtools::halo_descriptor, 3> *>(&(fields[i])),
                 ny,
                 nz,
                 0);
-            GT_CUDA_CHECK(cudaGetLastError());
+            GT_CUDA_CHECK(hipGetLastError());
         }
     }
 }

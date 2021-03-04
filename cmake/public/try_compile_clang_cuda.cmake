@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 # try_compile_clang_cuda(result, cuda_arch)
 # Parameters:
 #    - result: result variable is set to TRUE if Clang-CUDA compilation worked.
@@ -12,11 +13,11 @@ __global__ void helloworld(int* in, int* out) {
 int main(int argc, char* argv[]) {
     int* in;
     int* out;
-    cudaMalloc((void**)&in, sizeof(int));
-    cudaMalloc((void**)&out, sizeof(int));
-    helloworld<<<1,1>>>(in, out);
-    cudaFree(in);
-    cudaFree(out);
+    hipMalloc((void**)&in, sizeof(int));
+    hipMalloc((void**)&out, sizeof(int));
+    hipLaunchKernelGGL(helloworld, dim3(1), dim3(1), 0, 0, in, out);
+    hipFree(in);
+    hipFree(out);
 }
 ")
 

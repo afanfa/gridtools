@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 .. _storage-module:
 
 Storage Library
@@ -143,7 +144,7 @@ all data view methods are declared as device only.
   auto target_view = ds->target_view();
 
   // the use of the target view
-  kernel<<<1,1>>>(target_view);
+  hipLaunchKernelGGL(kernel, dim3(1), dim3(1), 0, 0, target_view);
 
   // memory transfer to the host space because the state is dirty_host
   // the state becomes clean
@@ -162,7 +163,7 @@ all data view methods are declared as device only.
       v(0) = v(1) = 42;
   }
 
-  kernel<<<1,1>>>(ds->target_view());
+  hipLaunchKernelGGL(kernel, dim3(1), dim3(1), 0, 0, ds->target_view());
 
   {
       auto v = ds->const_host_view();

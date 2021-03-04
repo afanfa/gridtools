@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -105,9 +106,9 @@ void m_packXL(array_t const &d_data_array,
     for (int i = 0; i < niter; i++) {
 
         // the actual kernel launch
-        m_packXLKernel<<<blocks, threads>>>(d_data_array[i], d_msgbufTab, d_msgsize, halo_d, ny, nz, i);
+        hipLaunchKernelGGL(m_packXLKernel, dim3(blocks), dim3(threads), 0, 0, d_data_array[i], d_msgbufTab, d_msgsize, halo_d, ny, nz, i);
 
-        GT_CUDA_CHECK(cudaGetLastError());
+        GT_CUDA_CHECK(hipGetLastError());
     }
 }
 
@@ -128,9 +129,9 @@ int call_kernel_XL(Blocks blocks,
     int nx,
     int ny,
     unsigned int i) {
-    m_packXLKernel<<<blocks, threads, b>>>(d_data, d_msgbufTab, d_msgsize, halo_d, nx, ny, i);
+    hipLaunchKernelGGL(m_packXLKernel, dim3(blocks), dim3(threads), b, 0, d_data, d_msgbufTab, d_msgsize, halo_d, nx, ny, i);
 
-    GT_CUDA_CHECK(cudaGetLastError());
+    GT_CUDA_CHECK(hipGetLastError());
 
     return 0;
 }

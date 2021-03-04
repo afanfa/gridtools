@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -27,12 +28,12 @@ __global__ void test_kernel(int *out_ptr) {
 
 TEST(multi_iterator, iterate_on_device) {
     int *out;
-    GT_CUDA_CHECK(cudaMalloc(&out, sizeof(int) * Size * Size));
+    GT_CUDA_CHECK(hipMalloc(&out, sizeof(int) * Size * Size));
 
-    test_kernel<<<1, 1>>>(out);
+    hipLaunchKernelGGL(test_kernel, dim3(1), dim3(1), 0, 0, out);
 
     int host_out[Size * Size];
-    GT_CUDA_CHECK(cudaMemcpy(&host_out, out, sizeof(int) * Size * Size, cudaMemcpyDeviceToHost));
+    GT_CUDA_CHECK(hipMemcpy(&host_out, out, sizeof(int) * Size * Size, hipMemcpyDeviceToHost));
 
     for (size_t i = 0; i < Size * Size; ++i)
         ASSERT_EQ(i, host_out[i]) << "at i = " << i;

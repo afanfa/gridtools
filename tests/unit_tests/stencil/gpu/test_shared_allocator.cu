@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -84,16 +85,16 @@ namespace gridtools {
                     auto int_ptr = allocate(allocator, meta::lazy::id<int16_t>{}, 32);
 
                     bool *result;
-                    GT_CUDA_CHECK(cudaMallocManaged(&result, 2 * sizeof(bool)));
+                    GT_CUDA_CHECK(hipMallocManaged(&result, 2 * sizeof(bool)));
 
-                    fill_and_check_test<<<2, 32, allocator.size()>>>(
+                    hipLaunchKernelGGL(fill_and_check_test, dim3(2), dim3(32), allocator.size(), 0, 
                         float_ptr, (float_ptr + 48) + (-16), int_ptr, result);
-                    GT_CUDA_CHECK(cudaDeviceSynchronize());
+                    GT_CUDA_CHECK(hipDeviceSynchronize());
 
                     EXPECT_TRUE(result[0]);
                     EXPECT_TRUE(result[1]);
 
-                    GT_CUDA_CHECK(cudaFree(result));
+                    GT_CUDA_CHECK(hipFree(result));
                 }
             } // namespace
         }     // namespace gpu_backend

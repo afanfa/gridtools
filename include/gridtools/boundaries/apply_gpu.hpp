@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -300,11 +301,11 @@ namespace gridtools {
             */
             template <typename... DataFieldViews>
             void apply(DataFieldViews const &... data_field_views) const {
-                apply_gpu_impl_::loop_kernel<<<m_conf.kernel_grid_size(), m_conf.kernel_thread_block_size()>>>(
+                hipLaunchKernelGGL(apply_gpu_impl_::loop_kernel, dim3(m_conf.kernel_grid_size()), dim3(m_conf.kernel_thread_block_size()), 0, 0, 
                     m_boundary_function, m_predicate, m_conf, data_field_views...);
-                GT_CUDA_CHECK(cudaGetLastError());
+                GT_CUDA_CHECK(hipGetLastError());
 #ifndef NDEBUG
-                GT_CUDA_CHECK(cudaDeviceSynchronize());
+                GT_CUDA_CHECK(hipDeviceSynchronize());
 #endif
             }
         };

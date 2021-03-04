@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * GridTools
  *
@@ -31,8 +32,8 @@ namespace gridtools {
         T exec_with_shared_memory(size_t shm_size, integral_constant<T (*)(), Fun> fun) {
             static_assert(std::is_trivially_copyable<T>::value, "");
             auto res = cuda_util::cuda_malloc<T>();
-            kernel<<<1, 1, shm_size>>>(res.get(), fun);
-            GT_CUDA_CHECK(cudaDeviceSynchronize());
+            hipLaunchKernelGGL(kernel, dim3(1), dim3(1), shm_size, 0, res.get(), fun);
+            GT_CUDA_CHECK(hipDeviceSynchronize());
             return cuda_util::from_clone(res);
         }
 
@@ -47,8 +48,8 @@ namespace gridtools {
             using res_t = std::decay_t<decltype(fun(args...))>;
             static_assert(std::is_trivially_copyable<res_t>::value, "");
             auto res = cuda_util::cuda_malloc<res_t>();
-            kernel<<<1, 1, shm_size>>>(res.get(), fun, args...);
-            GT_CUDA_CHECK(cudaDeviceSynchronize());
+            hipLaunchKernelGGL(kernel, dim3(1), dim3(1), shm_size, 0, res.get(), fun, args...);
+            GT_CUDA_CHECK(hipDeviceSynchronize());
             return cuda_util::from_clone(res);
         }
 
