@@ -219,8 +219,8 @@ macro(_gt_setup_targets _config_mode clang_cuda_mode)
                 # TODO check if fixed in Clang 11
                 target_compile_options(_gridtools_cuda INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>)
             endif()
-        elseif(type STREQUAL HIPCC-AMDGPU)
-            target_compile_options(_gridtools_cuda INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-xhip>)
+        #elseif(type STREQUAL HIPCC-AMDGPU)
+            #target_compile_options(_gridtools_cuda INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-xhip>)
         endif()
     endfunction()
 
